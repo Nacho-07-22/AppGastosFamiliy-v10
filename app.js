@@ -49,11 +49,30 @@ async function initFirebase() {
     // Verificar si ya está inicializado
     if (!firebase.apps.length) {
       firebase.initializeApp(window.firebaseConfig);
+
+      // Configurar dominios autorizados adicionales si existen
+      if (
+        window.firebaseSecondaryConfig &&
+        window.firebaseSecondaryConfig.authorizedDomains
+      ) {
+        const currentDomain = window.location.hostname;
+        if (
+          window.firebaseSecondaryConfig.authorizedDomains.includes(
+            currentDomain
+          )
+        ) {
+          console.info("Dominio autorizado:", currentDomain);
+        }
+      }
     }
+
     auth = firebase.auth();
     db = firebase.firestore();
     firebaseEnabled = true;
-    console.info("Firebase inicializado correctamente");
+    console.info(
+      "Firebase inicializado correctamente en:",
+      window.location.hostname
+    );
 
     // Configurar observer para cambios de autenticación
     auth.onAuthStateChanged((user) => {
@@ -810,3 +829,4 @@ appSection.style.display = "none";
 window._app = { cargarGastos, guardarGastos, mostrarGastos, mostrarReporte };
 
 /* Fin de app.js */
+
