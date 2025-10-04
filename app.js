@@ -7,6 +7,17 @@
    - soporte opcional en la "nube" usando Firebase Auth + Firestore si se crea firebase-config.js
 */
 
+// --- Configuración de Firebase ---
+window.firebaseConfig = {
+  apiKey: "AIzaSyCL6PzooGnKGHv6rBFsUM2tvHEgA0qnCHQ",
+  authDomain: "app-gastosfamily.firebaseapp.com",
+  projectId: "app-gastosfamily",
+  storageBucket: "app-gastosfamily.firebasestorage.app",
+  messagingSenderId: "289077365892",
+  appId: "1:289077365892:web:3e403636333c3cd64a46d1",
+  measurementId: "G-FX4XJTVLXZ",
+};
+
 // --- Utilidades de almacenamiento local ---
 let usuarios = [];
 function cargarUsuarios() {
