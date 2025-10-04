@@ -721,19 +721,18 @@ function mostrarUsuarios() {
   const ul = document.getElementById("usuarios-list");
   ul.innerHTML = "";
   cargarUsuarios();
+  let usuariosUnicos = {};
+  // Agregar usuarios locales
   usuarios.forEach((u) => {
-    const li = document.createElement("li");
-    li.innerHTML = `<i class="fa-solid fa-user"></i> ${escapeHtml(
-      u.usuario || u.email || "Usuario"
-    )} <button class='delete-user-btn' data-username='${
-      u.usuario
-    }'>Eliminar</button>`;
-    ul.appendChild(li);
+    const key = (u.usuario || u.email || "Usuario").toLowerCase();
+    usuariosUnicos[key] = {
+      nombre: u.usuario || u.email || "Usuario",
+      local: true,
+      email: u.email || "",
+      id: null,
+    };
   });
-  document.querySelectorAll(".delete-user-btn").forEach((btn) => {
-    btn.onclick = borrarUsuario;
-  });
-  // si firebase está activado, mostrar usuarios desde la nube (opcional)
+  // Agregar usuarios de la nube
   if (firebaseEnabled && db) {
     db.collection("users")
       .limit(50)
@@ -741,19 +740,72 @@ function mostrarUsuarios() {
       .then((snapshot) => {
         snapshot.forEach((doc) => {
           const d = doc.data();
+          const key = (d.username || d.email || "Usuario").toLowerCase();
+          usuariosUnicos[key] = {
+            nombre: d.username || d.email || "Usuario",
+            local: false,
+            email: d.email || "",
+            id: doc.id,
+          };
+        });
+        // Mostrar usuarios únicos
+        Object.values(usuariosUnicos).forEach((u) => {
           const li = document.createElement("li");
-          li.innerHTML = `<i class=\"fa-solid fa-user\"></i> ${escapeHtml(
-            d.username || d.email
-          )} <button class='delete-user-btn-nube' data-uid='${
-            doc.id
-          }'>Eliminar</button>`;
+          if (u.local) {
+            li.innerHTML = `<i class="fa-solid fa-user"></i> ${escapeHtml(
+              u.nombre
+            )} <button class='delete-user-btn' data-username='${escapeHtml(
+              u.nombre
+            )}'>Eliminar</button>`;
+          } else {
+            li.innerHTML = `<i class=\"fa-solid fa-user\"></i> ${escapeHtml(
+              u.nombre
+            )} <button class='delete-user-btn-nube' data-uid='${
+              u.id
+            }'>Eliminar</button>`;
+          }
           ul.appendChild(li);
+        });
+        document.querySelectorAll(".delete-user-btn").forEach((btn) => {
+          btn.onclick = borrarUsuario;
         });
         document.querySelectorAll(".delete-user-btn-nube").forEach((btn) => {
           btn.onclick = borrarUsuarioNube;
         });
       })
-      .catch(() => {});
+      .catch(() => {
+        // Si falla la nube, mostrar solo usuarios locales
+        Object.values(usuariosUnicos).forEach((u) => {
+          if (u.local) {
+            const li = document.createElement("li");
+            li.innerHTML = `<i class="fa-solid fa-user"></i> ${escapeHtml(
+              u.nombre
+            )} <button class='delete-user-btn' data-username='${escapeHtml(
+              u.nombre
+            )}'>Eliminar</button>`;
+            ul.appendChild(li);
+          }
+        });
+        document.querySelectorAll(".delete-user-btn").forEach((btn) => {
+          btn.onclick = borrarUsuario;
+        });
+      });
+  } else {
+    // Solo usuarios locales
+    Object.values(usuariosUnicos).forEach((u) => {
+      if (u.local) {
+        const li = document.createElement("li");
+        li.innerHTML = `<i class="fa-solid fa-user"></i> ${escapeHtml(
+          u.nombre
+        )} <button class='delete-user-btn' data-username='${escapeHtml(
+          u.nombre
+        )}'>Eliminar</button>`;
+        ul.appendChild(li);
+      }
+    });
+    document.querySelectorAll(".delete-user-btn").forEach((btn) => {
+      btn.onclick = borrarUsuario;
+    });
   }
 }
 
