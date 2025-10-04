@@ -1,10 +1,10 @@
 /* app.js - Control de Gastos Familiar
-   Cambios principales:
-   - 15 categorías con iconos
-   - campo tipo (Fijo / Variable)
-   - reportes combinados entre usuarios
-   - gráficos: por categoría (pie), mensual (bar), tendencia (line)
-   - soporte opcional en la "nube" usando Firebase Auth + Firestore si se crea firebase-config.js
+    Cambios principales:
+    15 categorías con iconos
+    campo tipo (Fijo / Variable)
+    reportes combinados entre usuarios
+    gráficos: por categoría (pie), mensual (bar), tendencia (line)
+    soporte opcional en la "nube" usando Firebase Auth + Firestore si se crea firebase-config.js
 */
 
 // --- Configuración de Firebase ---
@@ -863,3 +863,7 @@ async function initFirebase() {
 }
 
 /* Fin de app.js */
+
+document.addEventListener("DOMContentLoaded", function () {
+  // ...todo tu código JS aquí...
+});
