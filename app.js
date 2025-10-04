@@ -35,6 +35,10 @@ let db = null;
 
 // Función para inicializar Firebase
 async function initFirebase() {
+  console.log("Iniciando Firebase...");
+  console.log("URL actual:", window.location.href);
+  console.log("Dominio actual:", window.location.hostname);
+
   if (typeof firebase === "undefined") {
     console.error("Firebase no está cargado. Verifica las etiquetas script.");
     return false;
@@ -48,24 +52,17 @@ async function initFirebase() {
   try {
     // Verificar si ya está inicializado
     if (!firebase.apps.length) {
+      console.log("Configuración de Firebase:", {
+        ...window.firebaseConfig,
+        apiKey: "HIDDEN", // No mostrar la API key en consola
+      });
+
       firebase.initializeApp(window.firebaseConfig);
 
-      // Configurar dominios autorizados adicionales si existen
-      if (
-        window.firebaseSecondaryConfig &&
-        window.firebaseSecondaryConfig.authorizedDomains
-      ) {
-        const currentDomain = window.location.hostname;
-        if (
-          window.firebaseSecondaryConfig.authorizedDomains.includes(
-            currentDomain
-          )
-        ) {
-          console.info("Dominio autorizado:", currentDomain);
-        }
-      }
+      // Configurar dominios autorizados
+      const currentDomain = window.location.hostname;
+      console.log("Verificando dominio:", currentDomain);
     }
-
     auth = firebase.auth();
     db = firebase.firestore();
     firebaseEnabled = true;
@@ -829,4 +826,3 @@ appSection.style.display = "none";
 window._app = { cargarGastos, guardarGastos, mostrarGastos, mostrarReporte };
 
 /* Fin de app.js */
-
