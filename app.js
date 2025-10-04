@@ -722,17 +722,7 @@ function mostrarUsuarios() {
   ul.innerHTML = "";
   cargarUsuarios();
   let usuariosUnicos = {};
-  // Agregar usuarios locales
-  usuarios.forEach((u) => {
-    const key = (u.usuario || u.email || "Usuario").toLowerCase();
-    usuariosUnicos[key] = {
-      nombre: u.usuario || u.email || "Usuario",
-      local: true,
-      email: u.email || "",
-      id: null,
-    };
-  });
-  // Agregar usuarios de la nube
+  // Si la app está conectada a Firebase, solo mostrar usuarios de la nube
   if (firebaseEnabled && db) {
     db.collection("users")
       .limit(50)
@@ -743,31 +733,19 @@ function mostrarUsuarios() {
           const key = (d.username || d.email || "Usuario").toLowerCase();
           usuariosUnicos[key] = {
             nombre: d.username || d.email || "Usuario",
-            local: false,
             email: d.email || "",
             id: doc.id,
           };
         });
-        // Mostrar usuarios únicos
+        // Mostrar solo usuarios de la nube
         Object.values(usuariosUnicos).forEach((u) => {
           const li = document.createElement("li");
-          if (u.local) {
-            li.innerHTML = `<i class="fa-solid fa-user"></i> ${escapeHtml(
-              u.nombre
-            )} <button class='delete-user-btn' data-username='${escapeHtml(
-              u.nombre
-            )}'>Eliminar</button>`;
-          } else {
-            li.innerHTML = `<i class=\"fa-solid fa-user\"></i> ${escapeHtml(
-              u.nombre
-            )} <button class='delete-user-btn-nube' data-uid='${
-              u.id
-            }'>Eliminar</button>`;
-          }
+          li.innerHTML = `<i class=\"fa-solid fa-user\"></i> ${escapeHtml(
+            u.nombre
+          )} <button class='delete-user-btn-nube' data-uid='${
+            u.id
+          }'>Eliminar</button>`;
           ul.appendChild(li);
-        });
-        document.querySelectorAll(".delete-user-btn").forEach((btn) => {
-          btn.onclick = borrarUsuario;
         });
         document.querySelectorAll(".delete-user-btn-nube").forEach((btn) => {
           btn.onclick = borrarUsuarioNube;
@@ -775,16 +753,15 @@ function mostrarUsuarios() {
       })
       .catch(() => {
         // Si falla la nube, mostrar solo usuarios locales
-        Object.values(usuariosUnicos).forEach((u) => {
-          if (u.local) {
-            const li = document.createElement("li");
-            li.innerHTML = `<i class="fa-solid fa-user"></i> ${escapeHtml(
-              u.nombre
-            )} <button class='delete-user-btn' data-username='${escapeHtml(
-              u.nombre
-            )}'>Eliminar</button>`;
-            ul.appendChild(li);
-          }
+        cargarUsuarios();
+        usuarios.forEach((u) => {
+          const li = document.createElement("li");
+          li.innerHTML = `<i class="fa-solid fa-user"></i> ${escapeHtml(
+            u.usuario || u.email || "Usuario"
+          )} <button class='delete-user-btn' data-username='${
+            u.usuario
+          }'>Eliminar</button>`;
+          ul.appendChild(li);
         });
         document.querySelectorAll(".delete-user-btn").forEach((btn) => {
           btn.onclick = borrarUsuario;
@@ -792,16 +769,15 @@ function mostrarUsuarios() {
       });
   } else {
     // Solo usuarios locales
-    Object.values(usuariosUnicos).forEach((u) => {
-      if (u.local) {
-        const li = document.createElement("li");
-        li.innerHTML = `<i class="fa-solid fa-user"></i> ${escapeHtml(
-          u.nombre
-        )} <button class='delete-user-btn' data-username='${escapeHtml(
-          u.nombre
-        )}'>Eliminar</button>`;
-        ul.appendChild(li);
-      }
+    cargarUsuarios();
+    usuarios.forEach((u) => {
+      const li = document.createElement("li");
+      li.innerHTML = `<i class="fa-solid fa-user"></i> ${escapeHtml(
+        u.usuario || u.email || "Usuario"
+      )} <button class='delete-user-btn' data-username='${
+        u.usuario
+      }'>Eliminar</button>`;
+      ul.appendChild(li);
     });
     document.querySelectorAll(".delete-user-btn").forEach((btn) => {
       btn.onclick = borrarUsuario;
