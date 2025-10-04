@@ -858,12 +858,6 @@ async function initFirebase() {
 
   // Exponer funciones para consola si es necesario
   window._app = { cargarGastos, guardarGastos, mostrarGastos, mostrarReporte };
-
-  // <-- Agregar la llave faltante para cerrar el bloque abierto previamente
 }
 
 /* Fin de app.js */
-
-document.addEventListener("DOMContentLoaded", function () {
-  // ...todo tu código JS aquí...
-});
