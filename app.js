@@ -38,7 +38,7 @@ function guardarGastos() {
 // --- Inicialización de Firebase ---
 async function initFirebase() {
   console.log("Intentando inicializar Firebase...");
-  
+
   if (typeof firebase === "undefined") {
     console.warn("Firebase no está cargado. Usando modo local.");
     return false;
@@ -65,16 +65,16 @@ async function initFirebase() {
 // --- Sincronización con la nube ---
 async function sincronizarDesdeNube() {
   if (!firebaseEnabled || !db || !auth.currentUser) return;
-  
+
   try {
     const snapshot = await db
       .collection("gastos")
       .where("uid", "==", auth.currentUser.uid)
       .get();
-    
+
     cargarGastos();
     if (!gastos[usuarioActual]) gastos[usuarioActual] = [];
-    
+
     snapshot.forEach((doc) => {
       const d = doc.data();
       // Evitar duplicados por ts
@@ -89,7 +89,7 @@ async function sincronizarDesdeNube() {
         });
       }
     });
-    
+
     guardarGastos();
     console.log("✅ Datos sincronizados desde la nube");
   } catch (err) {
@@ -100,22 +100,22 @@ async function sincronizarDesdeNube() {
 // --- Funciones de utilidad ---
 function obtenerIconoCategoria(cat) {
   const iconos = {
-    "Alimentación": "🍔",
-    "Transporte": "🚗",
-    "Salud": "🩺",
-    "Educación": "📚",
-    "Hogar": "🏠",
-    "Servicios": "💡",
-    "Comunicación": "📱",
-    "Ropa": "👗",
-    "Mascotas": "🐶",
-    "Viajes": "✈️",
-    "Regalos": "🎁",
-    "Impuestos": "🧾",
-    "Ahorro": "💰",
-    "Trabajo": "💼",
-    "Ocio": "🎉",
-    "Otros": "🛒"
+    Alimentación: "🍔",
+    Transporte: "🚗",
+    Salud: "🩺",
+    Educación: "📚",
+    Hogar: "🏠",
+    Servicios: "💡",
+    Comunicación: "📱",
+    Ropa: "👗",
+    Mascotas: "🐶",
+    Viajes: "✈️",
+    Regalos: "🎁",
+    Impuestos: "🧾",
+    Ahorro: "💰",
+    Trabajo: "💼",
+    Ocio: "🎉",
+    Otros: "🛒",
   };
   return iconos[cat] || "💵";
 }
@@ -151,9 +151,18 @@ function lastNMonths(n) {
 
 function palette(n) {
   const base = [
-    "#ffa99f", "#4a5f7f", "#a8bcc4", "#e8dcd3", "#f4d7d7",
-    "#3498db", "#e67e22", "#2ecc71", "#e74c3c", "#9b59b6",
-    "#95a5a6", "#f1c40f"
+    "#ffa99f",
+    "#4a5f7f",
+    "#a8bcc4",
+    "#e8dcd3",
+    "#f4d7d7",
+    "#3498db",
+    "#e67e22",
+    "#2ecc71",
+    "#e74c3c",
+    "#9b59b6",
+    "#95a5a6",
+    "#f1c40f",
   ];
   const out = [];
   for (let i = 0; i < n; i++) out.push(base[i % base.length]);
@@ -170,11 +179,11 @@ function renderPie(canvasId, labels, data) {
       labels,
       datasets: [{ data, backgroundColor: palette(labels.length) }],
     },
-    options: { 
+    options: {
       responsive: true,
-      plugins: { 
-        legend: { position: "bottom" }
-      } 
+      plugins: {
+        legend: { position: "bottom" },
+      },
     },
   });
 }
@@ -227,7 +236,7 @@ function mostrarGastos() {
   const lista = gastos[usuarioActual] || [];
   const gastosList = document.getElementById("gastos-list");
   gastosList.innerHTML = "";
-  
+
   let total = 0;
   lista.forEach((g, i) => {
     total += g.monto;
@@ -238,11 +247,13 @@ function mostrarGastos() {
       hour: "2-digit",
       minute: "2-digit",
     });
-    
+
     const li = document.createElement("li");
     li.innerHTML = `
       <span>
-        ${icono} ${fecha.toLocaleDateString("es-CR")} ${hora} - ${escapeHtml(g.desc)}
+        ${icono} ${fecha.toLocaleDateString("es-CR")} ${hora} - ${escapeHtml(
+      g.desc
+    )}
         <small>(${g.categoria} · ${g.tipo || "Variable"})</small>
       </span>
       <span>₡${montoFormateado}</span>
@@ -251,9 +262,11 @@ function mostrarGastos() {
     `;
     gastosList.appendChild(li);
   });
-  
-  document.getElementById("reporte-total").textContent = `Total: ₡${formatColones(total)}`;
-  
+
+  document.getElementById(
+    "reporte-total"
+  ).textContent = `Total: ₡${formatColones(total)}`;
+
   document.querySelectorAll(".edit-btn").forEach((btn) => {
     btn.onclick = editarGasto;
   });
@@ -267,12 +280,12 @@ function editarGasto(e) {
   const idx = e.target.dataset.idx;
   cargarGastos();
   const gasto = gastos[usuarioActual][idx];
-  
+
   document.getElementById("desc-gasto").value = gasto.desc;
   document.getElementById("monto-gasto").value = gasto.monto;
   document.getElementById("tipo-gasto").value = gasto.tipo || "Variable";
   document.getElementById("categoria-gasto").value = gasto.categoria || "";
-  
+
   // Eliminar temporalmente; al guardar se re-crea
   gastos[usuarioActual].splice(idx, 1);
   guardarGastos();
@@ -284,11 +297,17 @@ async function eliminarGasto(e) {
   const idx = e.target.dataset.idx;
   cargarGastos();
   const gasto = gastos[usuarioActual][idx];
-  
-  if (!confirm(`¿Seguro que deseas eliminar el gasto '${gasto.desc}' de ₡${formatColones(gasto.monto)}?`)) {
+
+  if (
+    !confirm(
+      `¿Seguro que deseas eliminar el gasto '${gasto.desc}' de ₡${formatColones(
+        gasto.monto
+      )}?`
+    )
+  ) {
     return;
   }
-  
+
   // Eliminar de la nube si está activo
   if (firebaseEnabled && db && auth.currentUser) {
     try {
@@ -298,7 +317,7 @@ async function eliminarGasto(e) {
         .where("ts", "==", gasto.ts)
         .limit(1)
         .get();
-      
+
       if (!q.empty) {
         await db.collection("gastos").doc(q.docs[0].id).delete();
       }
@@ -306,11 +325,11 @@ async function eliminarGasto(e) {
       console.warn("Error al eliminar gasto en la nube:", err.message);
     }
   }
-  
+
   // Eliminar de local
   gastos[usuarioActual].splice(idx, 1);
   guardarGastos();
-  
+
   mostrarGastos();
   await mostrarReporte();
 }
@@ -319,12 +338,12 @@ async function eliminarGasto(e) {
 async function mostrarReporte() {
   cargarGastos();
   let allGastos = [];
-  
+
   // Agregar gastos locales
   Object.keys(gastos).forEach((u) => {
     (gastos[u] || []).forEach((g) => allGastos.push({ usuario: u, ...g }));
   });
-  
+
   // Si hay nube, obtener gastos de Firestore
   if (firebaseEnabled && db) {
     try {
@@ -333,7 +352,7 @@ async function mostrarReporte() {
       Object.values(gastos).forEach((arr) =>
         arr.forEach((g) => localTs.add(g.ts))
       );
-      
+
       snapshot.forEach((doc) => {
         const d = doc.data();
         const ts = d.ts || Date.now();
@@ -353,12 +372,13 @@ async function mostrarReporte() {
       console.warn("No se pudo leer gastos de la nube:", err.message);
     }
   }
-  
+
   const reporteTotal = document.getElementById("reporte-total");
-  
+
   if (allGastos.length === 0) {
-    reporteTotal.innerHTML = '<span style="color:#7f8c8d;">No hay gastos registrados</span>';
-    
+    reporteTotal.innerHTML =
+      '<span style="color:#7f8c8d;">No hay gastos registrados</span>';
+
     ["grafico-gastos", "grafico-mensual", "grafico-trend"].forEach((id) => {
       const canvas = document.getElementById(id);
       if (canvas && window[id + "_chart"]) {
@@ -367,34 +387,38 @@ async function mostrarReporte() {
     });
     return;
   }
-  
+
   // Agregados por categoría
   const categorias = {};
   allGastos.forEach((g) => {
-    categorias[g.categoria] = (categorias[g.categoria] || 0) + Number(g.monto || 0);
+    categorias[g.categoria] =
+      (categorias[g.categoria] || 0) + Number(g.monto || 0);
   });
-  
+
   const labels = Object.keys(categorias);
   const data = Object.values(categorias);
   renderPie("grafico-gastos", labels, data);
-  
+
   // Mensual (últimos 12 meses)
   const monthly = {};
   allGastos.forEach((g) => {
     const d = new Date(g.fecha);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}`;
     monthly[key] = (monthly[key] || 0) + Number(g.monto || 0);
   });
-  
+
   const months = lastNMonths(12);
   const monthlyData = months.map((m) => monthly[m] || 0);
   renderBar("grafico-mensual", months, monthlyData);
-  
+
   // Tendencia (últimos 6 meses)
   const months6 = lastNMonths(6);
   const trendData = months6.map((m) => monthly[m] || 0);
   renderLine("grafico-trend", months6, trendData);
-  
+
   // Total combinado
   const totalAll = allGastos.reduce((s, g) => s + Number(g.monto || 0), 0);
   reporteTotal.textContent = `Total combinado: ₡${formatColones(totalAll)}`;
@@ -404,7 +428,7 @@ async function mostrarReporte() {
 function mostrarUsuarios() {
   const ul = document.getElementById("usuarios-list");
   ul.innerHTML = "";
-  
+
   if (firebaseEnabled && db && auth.currentUser) {
     // Mostrar usuarios de la nube
     db.collection("users")
@@ -421,16 +445,20 @@ function mostrarUsuarios() {
             id: doc.id,
           };
         });
-        
+
         Object.values(usuariosUnicos).forEach((u) => {
           const li = document.createElement("li");
           li.innerHTML = `
-            <span><i class="fa-solid fa-user"></i> ${escapeHtml(u.nombre)}</span>
-            <button class='delete-user-btn-nube' data-uid='${u.id}'>Eliminar</button>
+            <span><i class="fa-solid fa-user"></i> ${escapeHtml(
+              u.nombre
+            )}</span>
+            <button class='delete-user-btn-nube' data-uid='${
+              u.id
+            }'>Eliminar</button>
           `;
           ul.appendChild(li);
         });
-        
+
         document.querySelectorAll(".delete-user-btn-nube").forEach((btn) => {
           btn.onclick = borrarUsuarioNube;
         });
@@ -449,12 +477,16 @@ function mostrarUsuariosLocales(ul) {
   usuarios.forEach((u) => {
     const li = document.createElement("li");
     li.innerHTML = `
-      <span><i class="fa-solid fa-user"></i> ${escapeHtml(u.usuario || u.email || "Usuario")}</span>
-      <button class='delete-user-btn' data-username='${u.usuario}'>Eliminar</button>
+      <span><i class="fa-solid fa-user"></i> ${escapeHtml(
+        u.usuario || u.email || "Usuario"
+      )}</span>
+      <button class='delete-user-btn' data-username='${
+        u.usuario
+      }'>Eliminar</button>
     `;
     ul.appendChild(li);
   });
-  
+
   document.querySelectorAll(".delete-user-btn").forEach((btn) => {
     btn.onclick = borrarUsuario;
   });
@@ -463,15 +495,15 @@ function mostrarUsuariosLocales(ul) {
 function borrarUsuario(e) {
   const username = e.target.dataset.username;
   if (!confirm(`¿Seguro que deseas eliminar el usuario '${username}'?`)) return;
-  
+
   cargarUsuarios();
   usuarios = usuarios.filter((u) => u.usuario !== username);
   guardarUsuarios();
-  
+
   cargarGastos();
   delete gastos[username];
   guardarGastos();
-  
+
   mostrarUsuarios();
   mostrarGastos();
   mostrarReporte();
@@ -480,7 +512,7 @@ function borrarUsuario(e) {
 async function borrarUsuarioNube(e) {
   const uid = e.target.dataset.uid;
   if (!confirm("¿Seguro que deseas eliminar tu cuenta en la nube?")) return;
-  
+
   if (firebaseEnabled && auth.currentUser && auth.currentUser.uid === uid) {
     try {
       await db.collection("users").doc(uid).delete();
@@ -511,30 +543,30 @@ function aplicarModoOscuro() {
 }
 
 // --- Inicialización de la app ---
-document.addEventListener("DOMContentLoaded", async function() {
+document.addEventListener("DOMContentLoaded", async function () {
   console.log("🚀 Iniciando app...");
-  
+
   // Inicializar Firebase
   await initFirebase();
-  
+
   // Elementos del DOM
   const loginSection = document.getElementById("login-section");
   const registroSection = document.getElementById("registro-section");
   const appSection = document.getElementById("app-section");
-  
+
   const loginForm = document.getElementById("login-form");
   const registroForm = document.getElementById("registro-form");
   const loginError = document.getElementById("login-error");
   const registroError = document.getElementById("registro-error");
-  
+
   const showRegistroBtn = document.getElementById("show-registro-btn");
   const backLoginBtn = document.getElementById("back-login-btn");
   const logoutBtn = document.getElementById("logout-btn");
   const userGreeting = document.getElementById("user-greeting");
-  
+
   const gastoForm = document.getElementById("gasto-form");
   const toggleDarkBtn = document.getElementById("toggle-dark-btn");
-  
+
   const navBtns = document.querySelectorAll(".nav-btn");
   const pages = {
     inicio: document.getElementById("inicio-section"),
@@ -542,65 +574,69 @@ document.addEventListener("DOMContentLoaded", async function() {
     reportes: document.getElementById("reportes-section"),
     usuarios: document.getElementById("usuarios-section"),
   };
-  
+
   // Navegación
   navBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
       const section = btn.dataset.section;
       if (!section) return;
-      
+
       Object.values(pages).forEach((p) => (p.style.display = "none"));
       pages[section].style.display = "block";
-      
+
       if (section === "reportes") mostrarReporte();
       if (section === "usuarios") mostrarUsuarios();
       if (section === "gastos") mostrarGastos();
     });
   });
-  
+
   // Mostrar registro
   showRegistroBtn.onclick = () => {
     loginSection.style.display = "none";
     registroSection.style.display = "block";
   };
-  
+
   // Volver al login
   backLoginBtn.onclick = () => {
     registroSection.style.display = "none";
     loginSection.style.display = "block";
   };
-  
+
   // Registro
   registroForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    
+
     const username = document.getElementById("new-username").value.trim();
     const email = document.getElementById("new-email").value.trim();
     const password = document.getElementById("new-password").value;
-    
+
     if (!username || !email || !password) {
       registroError.textContent = "Completa todos los campos.";
       return;
     }
-    
+
     cargarUsuarios();
-    
+
     if (firebaseEnabled) {
       try {
-        const userCred = await auth.createUserWithEmailAndPassword(email, password);
+        const userCred = await auth.createUserWithEmailAndPassword(
+          email,
+          password
+        );
         const uid = userCred.user.uid;
-        
+
         await db.collection("users").doc(uid).set({
           username,
           email,
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         });
-        
+
         registroError.textContent = "";
         registroForm.reset();
         registroSection.style.display = "none";
         loginSection.style.display = "block";
-        loginError.textContent = "Usuario registrado. Inicia sesión con tu email.";
+        loginError.textContent =
+          "Usuario registrado. Inicia sesión con tu email.";
         loginError.style.color = "#2ecc71";
       } catch (err) {
         registroError.textContent = err.message || "Error al registrar.";
@@ -610,35 +646,36 @@ document.addEventListener("DOMContentLoaded", async function() {
         registroError.textContent = "Usuario o email ya existe.";
         return;
       }
-      
+
       usuarios.push({ usuario: username, email, password });
       guardarUsuarios();
-      
+
       registroError.textContent = "";
       registroForm.reset();
       registroSection.style.display = "none";
       loginSection.style.display = "block";
-      loginError.textContent = "Usuario registrado. Ahora puedes iniciar sesión.";
+      loginError.textContent =
+        "Usuario registrado. Ahora puedes iniciar sesión.";
       loginError.style.color = "#2ecc71";
     }
   });
-  
+
   // Login
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     loginError.textContent = "";
-    
+
     const identifier = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value;
-    
+
     if (!identifier || !password) {
       loginError.textContent = "Completa ambos campos.";
       return;
     }
-    
+
     if (firebaseEnabled) {
       const email = identifier.includes("@") ? identifier : null;
-      
+
       try {
         if (email) {
           await auth.signInWithEmailAndPassword(email, password);
@@ -652,7 +689,7 @@ document.addEventListener("DOMContentLoaded", async function() {
             .where("username", "==", identifier)
             .limit(1)
             .get();
-          
+
           if (!q.empty) {
             const doc = q.docs[0];
             const userEmail = doc.data().email;
@@ -663,11 +700,11 @@ document.addEventListener("DOMContentLoaded", async function() {
             return;
           }
         }
-        
+
         loginSection.style.display = "none";
         appSection.style.display = "block";
         userGreeting.textContent = `Hola, ${usuarioActual}`;
-        
+
         await sincronizarDesdeNube();
         mostrarGastos();
       } catch (err) {
@@ -680,7 +717,7 @@ document.addEventListener("DOMContentLoaded", async function() {
           (u.usuario === identifier || u.email === identifier) &&
           u.password === password
       );
-      
+
       if (user) {
         usuarioActual = user.usuario;
         loginSection.style.display = "none";
@@ -692,17 +729,17 @@ document.addEventListener("DOMContentLoaded", async function() {
       }
     }
   });
-  
+
   // Logout
   logoutBtn.addEventListener("click", async () => {
     usuarioActual = null;
     if (firebaseEnabled && auth.currentUser) await auth.signOut();
-    
+
     loginSection.style.display = "block";
     appSection.style.display = "none";
     loginForm.reset();
     loginError.textContent = "";
-    
+
     setTimeout(() => {
       try {
         window.close();
@@ -711,23 +748,23 @@ document.addEventListener("DOMContentLoaded", async function() {
       }
     }, 300);
   });
-  
+
   // Crear gasto
   gastoForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    
+
     if (!usuarioActual) {
       alert("Inicia sesión primero.");
       return;
     }
-    
+
     const desc = document.getElementById("desc-gasto").value.trim();
     const monto = parseFloat(document.getElementById("monto-gasto").value);
     const categoria = document.getElementById("categoria-gasto").value;
     const tipo = document.getElementById("tipo-gasto").value;
-    
+
     if (!desc || isNaN(monto) || !categoria) return;
-    
+
     const gasto = {
       desc,
       monto,
@@ -736,12 +773,12 @@ document.addEventListener("DOMContentLoaded", async function() {
       fecha: new Date().toISOString(),
       ts: Date.now(),
     };
-    
+
     cargarGastos();
     if (!gastos[usuarioActual]) gastos[usuarioActual] = [];
     gastos[usuarioActual].push(gasto);
     guardarGastos();
-    
+
     if (firebaseEnabled && auth.currentUser) {
       try {
         await db.collection("gastos").add({
@@ -754,11 +791,11 @@ document.addEventListener("DOMContentLoaded", async function() {
         console.warn("Error subiendo gasto a la nube:", err.message);
       }
     }
-    
+
     mostrarGastos();
     gastoForm.reset();
   });
-  
+
   // Modo oscuro
   toggleDarkBtn.onclick = () => {
     const isDark = document.body.classList.toggle("dark-mode");
@@ -767,12 +804,12 @@ document.addEventListener("DOMContentLoaded", async function() {
       ? '<i class="fa-solid fa-sun"></i>'
       : '<i class="fa-solid fa-moon"></i>';
   };
-  
+
   // Aplicar preferencias
   aplicarModoOscuro();
   cargarUsuarios();
   cargarGastos();
-  
+
   console.log("✅ App inicializada correctamente");
 });
 
